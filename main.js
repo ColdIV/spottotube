@@ -56,6 +56,34 @@ async function getPlaylistTracks(offset = 0, limit = 100) {
     });
 }
 
+
+function searchSong(artist, song, API_KEY) {
+    var apiKey = API_KEY;
+
+    var request = gapi.client.youtube.search.list({
+        q: artist + " " + song,
+        part: 'snippet',
+        key: apiKey
+    });
+
+    request.execute(function (response) {
+        var videoId = response.items[0].id.videoId;
+        console.log("Video ID: " + videoId);
+    });
+}
+
+function searchSongs(API_KEY) {
+    gapi.load('client', function () {
+        gapi.client.load('youtube', 'v3', function () {
+            // @TODO: Loop through all songs from spotify playlist and search for each
+            // Output shold then be a list of all youtube links in a textfield
+            // searchSong('artist', 'song', API_KEY)
+        });
+    });
+}
+
+
+
 async function main() {
     let data = await fetch('secrets.json').then(response => response.json()).then(data => data).catch(error => null);
     if (!data) {
@@ -71,7 +99,22 @@ async function main() {
             }
         });
     } else {
-        getSpotifyAccessToken(data)
+        getSpotifyAccessToken(data);
+
+        let YOUTUBE_API_KEY = data.youtube_api_key;
+        document.querySelector('#youtubeApiKey').value = YOUTUBE_API_KEY;
+        document.querySelector('#getSongsButton').addEventListener('click', () => {
+            if (!YOUTUBE_API_KEY) {
+                YOUTUBE_API_KEY = document.querySelector('#youtubeApiKey').value;
+                if (!YOUTUBE_API_KEY) {
+                    errorContainer.innerHTML = 'YOUTUBE_API_KEY is required.';
+                } else {
+                    searchSongs(YOUTUBE_API_KEY);
+                }
+            } else {
+                searchSongs(YOUTUBE_API_KEY);
+            }
+        });
     }
 
 }

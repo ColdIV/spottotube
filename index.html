@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="vdlcss-min.css">
     <title>Spot To Tube</title>
+    <!-- YouTube API -->
+    <script src="https://apis.google.com/js/api.js"></script>
 </head>
+
 <body class="bg-black">
     <main>
         <div class="container white p-1">
             <h1><span class="green">Spot</span> to <span class="red">Tube</span></h1>
             <section class="hover-border p-1 border-white rounded">
-            <h2>Spotify</h2>
+                <h2 class="green">Spotify</h2>
                 <h3>Get Token</h3>
                 <p class="bg-blue p-05 rounded">If you already have a TOKEN, enter it below.</p>
-                <p>To get your CLIENT_ID and CLIENT_SECRET, go to <a href="https://developer.spotify.com/dashboard/applications">developer.spotify.com</a> and create a new application. Copy the CLIENT_ID and CLIENT_SECRET into the fields below. They can be found in the settings of the application.</p>
+                <p>To get your CLIENT_ID and CLIENT_SECRET, go to <a
+                        href="https://developer.spotify.com/dashboard/applications" target="_blank">developer.spotify.com</a> and create
+                    a new application. Copy the CLIENT_ID and CLIENT_SECRET into the fields below. They can be found in
+                    the settings of the application.</p>
                 <div>
                     <label for="clientId">CLIENT_ID</label>
                     <input type="text" id="clientId">
@@ -34,7 +41,8 @@
                 <p>
                     Enter the ID of your playlist. You can retrieve it by copying the share link of a playlist.<br>
                     It is the marked part in this example:<br>
-                    <span class="font-mono">https://open.spotify.com/playlist/<mark class="bg-green">0Zvav5QsRNpDECMuZXu6s3</mark>?si=5498debfb5044010</span>
+                    <span class="font-mono">https://open.spotify.com/playlist/<mark
+                            class="bg-green">0Zvav5QsRNpDECMuZXu6s3</mark>?si=5498debfb5044010</span>
                 </p>
                 <div>
                     <label for="playlistId">PLAYLIST_ID</label>
@@ -46,8 +54,22 @@
                     <input type="submit" id="getPlaylistData" value="Get Playlist Data">
                 </div>
             </section>
+
+            <section class="hover-border p-1 border-white rounded">
+                <h2 class="red">YouTube</h2>
+                <p>You will have to turn on the <a href="https://developers.google.com/youtube/v3/quickstart/nodejs" target="_blank">YouTube Data API</a> and create a project.</p>
+                <h3>Get YouTube Links from Spotify Playlist data</h3>
+                <div>
+                    <label for="youtubeApiKey">YOUTUBE_API_KEY</label>
+                    <input type="text" id="youtubeApiKey">
+                </div>
+                <div>
+                    <input type="submit" value="Get Songs" id="getSongsButton">
+                </div>
+            </section>
         </div>
     </main>
     <script src="main.js"></script>
 </body>
+
 </html>
