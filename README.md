@@ -36,3 +36,9 @@ By clicking on _Get Playlist Data_ the textarea under the button will be filled 
 If you want to get the YouTube Links for those songs, you can scroll down and click on _Get Songs_.
 
 __Note__: The YouTube Search API is limitted to 100 requests per day, so if you don't pay for the API, that is all you get right now.
+
+## Planned
+- return json with only track name, artist and youtube url
+- add option to run main.js via npm, without website
+- maybe store playlist data locally (local storage?) to retry remaining songs if the youtube data limit has been reached
+- other stuff i forgot
