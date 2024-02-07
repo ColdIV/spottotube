@@ -69,15 +69,31 @@ function searchSong(artist, song, API_KEY) {
     request.execute(function (response) {
         var videoId = response.items[0].id.videoId;
         console.log("Video ID: " + videoId);
+        return videoId
     });
 }
 
 function searchSongs(API_KEY) {
+    const playlistData = document.querySelector('#playlistData').value
+    const tracks = JSON.parse(playlistData)["tracks"]
+    let tracks_clean = []
+    for (let i = 0; i < tracks.length; ++i) {
+        tracks_clean.push({
+            "artist": tracks[i]["track"]["artists"][0]["name"],
+            "track": tracks[i]["track"]["name"]
+        })
+    }
+
     gapi.load('client', function () {
         gapi.client.load('youtube', 'v3', function () {
-            // @TODO: Loop through all songs from spotify playlist and search for each
-            // Output shold then be a list of all youtube links in a textfield
-            // searchSong('artist', 'song', API_KEY)
+            for (let i = 0; i < tracks_clean.length; ++i) {
+                // 600ms timeout because YouTube API only allows max 2 requests per second.
+                setTimeout(
+                    () => {
+                        tracks_clean[i]["videoId"] = searchSong(tracks_clean[i]["artist"], tracks_clean[i]["track"], API_KEY)
+                    }, 600)
+            }
+            document.querySelector('#youtubeLinks').value = JSON.stringify(tracks_clean)
         });
     });
 }
