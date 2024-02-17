@@ -3,6 +3,10 @@ const getPlaylistDataButton = document.querySelector('#getPlaylistData');
 getPlaylistDataButton.addEventListener('click', () => {
     getPlaylist()
 });
+const getListButton = document.querySelector('#getListButton');
+getListButton.addEventListener('click', () => {
+    getYouTubeLinks();
+});
 let CANCEL_YOUTUBE_API_CALLS = false;
 
 async function getSpotifyAccessToken(data) {
@@ -109,14 +113,22 @@ function searchSongs(API_KEY) {
                 await searchAndDelay(artist, track, API_KEY);
             }
             if (CANCEL_YOUTUBE_API_CALLS) {
-                document.querySelector('#youtubeLinks').value = "YouTube API limit reached. Please try again later. (Max 100 requests per day.)";
+                document.querySelector('#youtubeData').value = "YouTube API limit reached. Please try again later. (Max 100 requests per day.)";
                 console.error("YouTube API limit reached.")
                 console.log(tracks_clean);
                 return;
             }
-            document.querySelector('#youtubeLinks').value = JSON.stringify(tracks_clean);
+            document.querySelector('#youtubeData').value = JSON.stringify(tracks_clean);
         });
     });
+}
+
+function getYouTubeLinks() {
+    const youtubeJSON = document.querySelector('#youtubeData').value;
+    const youtubeLinksContainer = document.querySelector('#youtubeLinks');
+    if (youtubeJSON) {
+        youtubeLinksContainer.value = JSON.parse(youtubeJSON).map((item) => "https://www.youtube.com/watch?v=" + item.videoId).join('\n');
+    }
 }
 
 
