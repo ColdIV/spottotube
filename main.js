@@ -2,7 +2,8 @@ const errorContainer = document.querySelector('#errors');
 const getPlaylistDataButton = document.querySelector('#getPlaylistData');
 getPlaylistDataButton.addEventListener('click', () => {
     getPlaylist()
-})
+});
+let CANCEL_YOUTUBE_API_CALLS = false;
 
 async function getSpotifyAccessToken(data) {
     const client_id = data.client_id;
@@ -57,47 +58,66 @@ async function getPlaylistTracks(offset = 0, limit = 100) {
 }
 
 
-function searchSong(artist, song, API_KEY) {
-    var apiKey = API_KEY;
+async function searchSong(artist, song, API_KEY) {
+    const apiKey = API_KEY;
 
-    var request = gapi.client.youtube.search.list({
-        q: artist + " " + song,
-        part: 'snippet',
-        key: apiKey
-    });
+    return new Promise((resolve, reject) => {
+        const request = gapi.client.youtube.search.list({
+            q: artist + " " + song,
+            part: 'snippet',
+            key: apiKey
+        });
 
-    request.execute(function (response) {
-        var videoId = response.items[0].id.videoId;
-        console.log("Video ID: " + videoId);
-        return videoId
-    });
-}
-
-function searchSongs(API_KEY) {
-    const playlistData = document.querySelector('#playlistData').value
-    const tracks = JSON.parse(playlistData)["tracks"]
-    let tracks_clean = []
-    for (let i = 0; i < tracks.length; ++i) {
-        tracks_clean.push({
-            "artist": tracks[i]["track"]["artists"][0]["name"],
-            "track": tracks[i]["track"]["name"]
-        })
-    }
-
-    gapi.load('client', function () {
-        gapi.client.load('youtube', 'v3', function () {
-            for (let i = 0; i < tracks_clean.length; ++i) {
-                // 600ms timeout because YouTube API only allows max 2 requests per second.
-                setTimeout(
-                    () => {
-                        tracks_clean[i]["videoId"] = searchSong(tracks_clean[i]["artist"], tracks_clean[i]["track"], API_KEY)
-                    }, 600)
+        request.execute(function (response) {
+            if (response.code === 403) {
+                CANCEL_YOUTUBE_API_CALLS = true;
+                reject(new Error("YouTube API error"));
+            } else {
+                const videoId = response.items[0].id.videoId;
+                resolve(videoId);
             }
-            document.querySelector('#youtubeLinks').value = JSON.stringify(tracks_clean)
         });
     });
 }
 
+function searchSongs(API_KEY) {
+    const playlistData = document.querySelector('#playlistData').value;
+    const tracks = JSON.parse(playlistData)["tracks"];
+    let tracks_clean = [];
+
+    // Helper function to search for a song and add a delay
+    async function searchAndDelay(artist, song, API_KEY) {
+        return new Promise((resolve) => {
+            setTimeout(async () => {
+                const videoId = await searchSong(artist, song, API_KEY);
+                tracks_clean.push({
+                    artist,
+                    track: song,
+                    videoId
+                });
+                console.log("Found: ", artist, song, videoId)
+                resolve();
+            }, 600); // Delay each iteration by 600ms
+        });
+    }
+
+    gapi.load('client', function () {
+        gapi.client.load('youtube', 'v3', async function () {
+            for (let i = 0; i < tracks.length && !CANCEL_YOUTUBE_API_CALLS; ++i) {
+                const artist = tracks[i]["track"]['artists'][0]['name'];
+                const track = tracks[i]["track"]['name'];
+                await searchAndDelay(artist, track, API_KEY);
+            }
+            if (CANCEL_YOUTUBE_API_CALLS) {
+                document.querySelector('#youtubeLinks').value = "YouTube API limit reached. Please try again later. (Max 100 requests per day.)";
+                console.error("YouTube API limit reached.")
+                console.log(tracks_clean);
+                return;
+            }
+            document.querySelector('#youtubeLinks').value = JSON.stringify(tracks_clean);
+        });
+    });
+}
 
 
 async function main() {
